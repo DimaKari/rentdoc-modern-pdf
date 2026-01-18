@@ -18,8 +18,6 @@
       --ink:#0b1220;
       --muted:#334155;
       --muted2:#64748b;
-      --line:#e2e8f0;
-      --lineStrong:#cbd5e1;
 
       --bg:#eef2f7;
       --paper:#ffffff;
@@ -28,6 +26,9 @@
       --accent1:#2563eb;      /* blue */
       --accent2:#06b6d4;      /* cyan */
       --accentSoft:#eaf6ff;
+
+      --line:#e2e8f0;
+      --lineStrong:#cbd5e1;
 
       --radius:16px;
       --shadow: 0 18px 45px rgba(2, 6, 23, .14);
@@ -91,48 +92,6 @@
     }
 
     /* =========================================================
-       MODERN "SIGNATURE LINES" (Brand motif)
-       Calm geometry, looks like "document security pattern"
-    ========================================================== */
-    .motif{
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      opacity: .55;
-      mix-blend-mode: multiply;
-    }
-    .motif::before{
-      content:"";
-      position:absolute;
-      left:-40mm;
-      top:-30mm;
-      width: 160mm;
-      height: 160mm;
-      background:
-        radial-gradient(closest-side, rgba(37,99,235,.10), transparent 70%),
-        radial-gradient(closest-side, rgba(6,182,212,.10), transparent 70%);
-      filter: blur(0px);
-    }
-    .motif::after{
-      content:"";
-      position:absolute;
-      right:-55mm;
-      bottom:-55mm;
-      width: 220mm;
-      height: 220mm;
-      background:
-        repeating-linear-gradient(
-          135deg,
-          rgba(37,99,235,.06) 0px,
-          rgba(37,99,235,.06) 2px,
-          transparent 2px,
-          transparent 12px
-        );
-      border-radius: 999px;
-      transform: rotate(8deg);
-    }
-
-    /* =========================================================
        TYPOGRAPHY
     ========================================================== */
     h1{
@@ -171,7 +130,7 @@
     }
 
     p, li{
-      font-size: 12.1px;     /* slightly larger for readability */
+      font-size: 12.1px;
       line-height: 1.55;
       color: var(--muted);
       margin: 0;
@@ -394,37 +353,55 @@
       white-space: nowrap;
     }
 
-    /* Stable rows: lines DO NOT "shift" */
+    /* =========================================================
+       FORM (STABLE) – table-layout to stop "line drifting"
+    ========================================================== */
     .form{
+      width: 100%;
       border-top: 1px solid var(--line);
       padding-top: 6px;
     }
 
-    .row{
-      display: grid;
-      grid-template-columns: 1fr 1.25fr;
-      gap: 14px;
-      align-items: center;
-      padding: 8px 0;
-      border-bottom: 1px solid var(--line);
-      min-height: 32px;  /* stability across renderers */
+    .form-table{
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed; /* key for stability */
     }
-    .row:last-child{ border-bottom: none; }
+    .form-table tr{
+      border-bottom: 1px solid var(--line);
+    }
+    .form-table tr:last-child{
+      border-bottom: none;
+    }
+    .form-table td{
+      padding: 8px 0;
+      vertical-align: bottom; /* aligns baselines */
+    }
+    .form-table td.label-cell{
+      width: 44%;
+      padding-right: 14px;
+    }
+    .form-table td.field-cell{
+      width: 56%;
+    }
 
     .label{
       font-size: 12.2px;
       color: var(--ink);
+      line-height: 1.25;
+      word-break: break-word;
     }
 
-    /* The underline is drawn via background; avoids width bugs */
+    /* Single robust line */
     .field{
       height: 18px;
-      background:
-        linear-gradient(to bottom, transparent 70%, var(--lineStrong) 70%, var(--lineStrong) 82%, transparent 82%);
-      border-radius: 6px;
+      border-bottom: 2px solid var(--lineStrong);
+      border-radius: 0;
+      box-sizing: border-box;
+      width: 100%;
     }
 
-    /* Checkbox line */
+    /* Checkbox line cell */
     .checks{
       display:flex;
       justify-content: flex-end;
@@ -449,7 +426,7 @@
       border: 1px solid var(--line);
       border-radius: var(--radius);
       padding: 12px;
-      background: linear-gradient(135deg, rgba(37,99,235,.05), rgba(6,182,212,.04));
+      background: rgba(248,250,252,.95);
     }
 
     ul{
@@ -472,7 +449,6 @@
       color: var(--muted2);
     }
 
-    /* Avoid breaking blocks mid-page */
     .avoid-break{
       break-inside: avoid;
       page-break-inside: avoid;
@@ -516,8 +492,6 @@
     ========================================================== -->
     <section class="page">
       <div class="page-inner">
-        <div class="motif"></div>
-
         <div class="page-body">
           <div class="doc-header">
             <div class="brand">
@@ -615,8 +589,8 @@
             <div class="toc-row">
               <div class="toc-n">05</div>
               <div class="toc-t">
-                <b>Nachweise (Checkliste)</b>
-                <span>Dokumente zur Stärkung der Bewerbung</span>
+                <b>Nachweise (Checkliste) & Erklärungen</b>
+                <span>Dokumente + Zustimmung/Unterschrift</span>
               </div>
               <div class="toc-p">Seite 6</div>
             </div>
@@ -640,13 +614,9 @@
       </div>
     </section>
 
-    <!-- =========================================================
-         PAGE 2
-    ========================================================== -->
+    <!-- PAGE 2 -->
     <section class="page">
       <div class="page-inner">
-        <div class="motif"></div>
-
         <div class="page-body">
           <div class="page-head">
             <div>
@@ -661,48 +631,36 @@
 
           <div class="block avoid-break">
             <div class="block-title">
-              <div>
-                <h3>Mietobjekt</h3>
-              </div>
+              <div><h3>Mietobjekt</h3></div>
               <div class="chip">Angaben</div>
             </div>
 
             <div class="form">
-              <div class="row">
-                <div class="label">Straße, Hausnummer</div>
-                <div class="field"></div>
-              </div>
-              <div class="row">
-                <div class="label">PLZ, Ort</div>
-                <div class="field"></div>
-              </div>
-              <div class="row">
-                <div class="label">Gewünschter Einzug</div>
-                <div class="field"></div>
-              </div>
-              <div class="row">
-                <div class="label">Kaltmiete (€/Monat)</div>
-                <div class="field"></div>
-              </div>
+              <table class="form-table">
+                <tr><td class="label-cell"><div class="label">Straße, Hausnummer</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">PLZ, Ort</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Gewünschter Einzug</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Kaltmiete (€/Monat)</div></td><td class="field-cell"><div class="field"></div></td></tr>
+              </table>
             </div>
           </div>
 
           <div class="block avoid-break">
             <div class="block-title">
-              <div>
-                <h3>Hauptmieter/in</h3>
-              </div>
+              <div><h3>Hauptmieter/in</h3></div>
               <div class="chip">Person</div>
             </div>
 
             <div class="form">
-              <div class="row"><div class="label">Anrede</div><div class="field"></div></div>
-              <div class="row"><div class="label">Vorname (wie im Ausweis)</div><div class="field"></div></div>
-              <div class="row"><div class="label">Nachname (wie im Ausweis)</div><div class="field"></div></div>
-              <div class="row"><div class="label">Geburtsdatum</div><div class="field"></div></div>
-              <div class="row"><div class="label">Geburtsort</div><div class="field"></div></div>
-              <div class="row"><div class="label">Staatsangehörigkeit</div><div class="field"></div></div>
-              <div class="row"><div class="label">Familienstand</div><div class="field"></div></div>
+              <table class="form-table">
+                <tr><td class="label-cell"><div class="label">Anrede</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Vorname (wie im Ausweis)</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Nachname (wie im Ausweis)</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Geburtsdatum</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Geburtsort</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Staatsangehörigkeit</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Familienstand</div></td><td class="field-cell"><div class="field"></div></td></tr>
+              </table>
             </div>
           </div>
 
@@ -713,16 +671,20 @@
             </div>
 
             <div class="form">
-              <div class="row"><div class="label">Anzahl Personen im Haushalt</div><div class="field"></div></div>
-              <div class="row"><div class="label">Davon Kinder</div><div class="field"></div></div>
-              <div class="row"><div class="label">Haustiere (Art & Anzahl)</div><div class="field"></div></div>
-              <div class="row">
-                <div class="label">Raucher</div>
-                <div class="checks">
-                  <span><span class="box"></span>ja</span>
-                  <span><span class="box"></span>nein</span>
-                </div>
-              </div>
+              <table class="form-table">
+                <tr><td class="label-cell"><div class="label">Anzahl Personen im Haushalt</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Davon Kinder</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Haustiere (Art & Anzahl)</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr>
+                  <td class="label-cell"><div class="label">Raucher</div></td>
+                  <td class="field-cell">
+                    <div class="checks">
+                      <span><span class="box"></span>ja</span>
+                      <span><span class="box"></span>nein</span>
+                    </div>
+                  </td>
+                </tr>
+              </table>
             </div>
           </div>
         </div>
@@ -737,13 +699,9 @@
       </div>
     </section>
 
-    <!-- =========================================================
-         PAGE 3
-    ========================================================== -->
+    <!-- PAGE 3 -->
     <section class="page">
       <div class="page-inner">
-        <div class="motif"></div>
-
         <div class="page-body">
           <div class="page-head">
             <div>
@@ -763,10 +721,12 @@
             </div>
 
             <div class="form">
-              <div class="row"><div class="label">Telefon (mobil)</div><div class="field"></div></div>
-              <div class="row"><div class="label">Telefon (Festnetz, optional)</div><div class="field"></div></div>
-              <div class="row"><div class="label">E-Mail-Adresse</div><div class="field"></div></div>
-              <div class="row"><div class="label">Alternative E-Mail (optional)</div><div class="field"></div></div>
+              <table class="form-table">
+                <tr><td class="label-cell"><div class="label">Telefon (mobil)</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Telefon (Festnetz, optional)</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">E-Mail-Adresse</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Alternative E-Mail (optional)</div></td><td class="field-cell"><div class="field"></div></td></tr>
+              </table>
             </div>
           </div>
 
@@ -777,12 +737,14 @@
             </div>
 
             <div class="form">
-              <div class="row"><div class="label">Straße, Hausnummer</div><div class="field"></div></div>
-              <div class="row"><div class="label">PLZ, Ort</div><div class="field"></div></div>
-              <div class="row"><div class="label">Wohnhaft seit (Monat/Jahr)</div><div class="field"></div></div>
-              <div class="row"><div class="label">Wohnfläche (m²)</div><div class="field"></div></div>
-              <div class="row"><div class="label">Kaltmiete (€/Monat)</div><div class="field"></div></div>
-              <div class="row"><div class="label">Kündigungsfrist</div><div class="field"></div></div>
+              <table class="form-table">
+                <tr><td class="label-cell"><div class="label">Straße, Hausnummer</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">PLZ, Ort</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Wohnhaft seit (Monat/Jahr)</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Wohnfläche (m²)</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Kaltmiete (€/Monat)</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Kündigungsfrist</div></td><td class="field-cell"><div class="field"></div></td></tr>
+              </table>
             </div>
           </div>
 
@@ -793,9 +755,11 @@
             </div>
 
             <div class="form">
-              <div class="row"><div class="label">Name</div><div class="field"></div></div>
-              <div class="row"><div class="label">Telefon</div><div class="field"></div></div>
-              <div class="row"><div class="label">E-Mail</div><div class="field"></div></div>
+              <table class="form-table">
+                <tr><td class="label-cell"><div class="label">Name</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Telefon</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">E-Mail</div></td><td class="field-cell"><div class="field"></div></td></tr>
+              </table>
             </div>
 
             <div class="note">
@@ -814,13 +778,9 @@
       </div>
     </section>
 
-    <!-- =========================================================
-         PAGE 4
-    ========================================================== -->
+    <!-- PAGE 4 -->
     <section class="page">
       <div class="page-inner">
-        <div class="motif"></div>
-
         <div class="page-body">
           <div class="page-head">
             <div>
@@ -840,12 +800,14 @@
             </div>
 
             <div class="form">
-              <div class="row"><div class="label">Beruf / Tätigkeit</div><div class="field"></div></div>
-              <div class="row"><div class="label">Arbeitgeber / Firma</div><div class="field"></div></div>
-              <div class="row"><div class="label">Branche</div><div class="field"></div></div>
-              <div class="row"><div class="label">Position</div><div class="field"></div></div>
-              <div class="row"><div class="label">Beschäftigt seit (Monat/Jahr)</div><div class="field"></div></div>
-              <div class="row"><div class="label">Art (unbefristet / befristet)</div><div class="field"></div></div>
+              <table class="form-table">
+                <tr><td class="label-cell"><div class="label">Beruf / Tätigkeit</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Arbeitgeber / Firma</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Branche</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Position</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Beschäftigt seit (Monat/Jahr)</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Art (unbefristet / befristet)</div></td><td class="field-cell"><div class="field"></div></td></tr>
+              </table>
             </div>
           </div>
 
@@ -856,11 +818,13 @@
             </div>
 
             <div class="form">
-              <div class="row"><div class="label">Haushaltsnettoeinkommen gesamt (€/Monat)</div><div class="field"></div></div>
-              <div class="row"><div class="label">Nettoeinkommen Hauptmieter (€/Monat)</div><div class="field"></div></div>
-              <div class="row"><div class="label">Nettoeinkommen Partner/in (€/Monat)</div><div class="field"></div></div>
-              <div class="row"><div class="label">Sonstige Einkünfte (€/Monat)</div><div class="field"></div></div>
-              <div class="row"><div class="label">Art der sonstigen Einkünfte</div><div class="field"></div></div>
+              <table class="form-table">
+                <tr><td class="label-cell"><div class="label">Haushaltsnettoeinkommen gesamt (€/Monat)</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Nettoeinkommen Hauptmieter (€/Monat)</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Nettoeinkommen Partner/in (€/Monat)</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Sonstige Einkünfte (€/Monat)</div></td><td class="field-cell"><div class="field"></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Art der sonstigen Einkünfte</div></td><td class="field-cell"><div class="field"></div></td></tr>
+              </table>
             </div>
 
             <div class="note">
@@ -881,13 +845,9 @@
       </div>
     </section>
 
-    <!-- =========================================================
-         PAGE 5
-    ========================================================== -->
+    <!-- PAGE 5 -->
     <section class="page">
       <div class="page-inner">
-        <div class="motif"></div>
-
         <div class="page-body">
           <div class="page-head">
             <div>
@@ -907,26 +867,13 @@
             </div>
 
             <div class="form">
-              <div class="row">
-                <div class="label">Ich bin in der Lage, Miete und Nebenkosten pünktlich zu zahlen</div>
-                <div class="checks"><span><span class="box"></span>ja</span><span><span class="box"></span>nein</span></div>
-              </div>
-              <div class="row">
-                <div class="label">In den letzten 24 Monaten gab es keine Mietrückstände</div>
-                <div class="checks"><span><span class="box"></span>ja</span><span><span class="box"></span>nein</span></div>
-              </div>
-              <div class="row">
-                <div class="label">Es laufen keine Insolvenz- oder Mahnverfahren gegen mich</div>
-                <div class="checks"><span><span class="box"></span>ja</span><span><span class="box"></span>nein</span></div>
-              </div>
-              <div class="row">
-                <div class="label">Es bestehen keine negativen SCHUFA-Einträge</div>
-                <div class="checks"><span><span class="box"></span>ja</span><span><span class="box"></span>nein</span></div>
-              </div>
-              <div class="row">
-                <div class="label">Ich bin bereit, eine SCHUFA-Bonitätsauskunft vorzulegen</div>
-                <div class="checks"><span><span class="box"></span>ja</span><span><span class="box"></span>nein</span></div>
-              </div>
+              <table class="form-table">
+                <tr><td class="label-cell"><div class="label">Ich bin in der Lage, Miete und Nebenkosten pünktlich zu zahlen</div></td><td class="field-cell"><div class="checks"><span><span class="box"></span>ja</span><span><span class="box"></span>nein</span></div></td></tr>
+                <tr><td class="label-cell"><div class="label">In den letzten 24 Monaten gab es keine Mietrückstände</div></td><td class="field-cell"><div class="checks"><span><span class="box"></span>ja</span><span><span class="box"></span>nein</span></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Es laufen keine Insolvenz- oder Mahnverfahren gegen mich</div></td><td class="field-cell"><div class="checks"><span><span class="box"></span>ja</span><span><span class="box"></span>nein</span></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Es bestehen keine negativen SCHUFA-Einträge</div></td><td class="field-cell"><div class="checks"><span><span class="box"></span>ja</span><span><span class="box"></span>nein</span></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Ich bin bereit, eine SCHUFA-Bonitätsauskunft vorzulegen</div></td><td class="field-cell"><div class="checks"><span><span class="box"></span>ja</span><span><span class="box"></span>nein</span></div></td></tr>
+              </table>
             </div>
           </div>
 
@@ -937,18 +884,11 @@
             </div>
 
             <div class="form">
-              <div class="row">
-                <div class="label">Laufende Kredite oder Ratenzahlungen?</div>
-                <div class="checks"><span><span class="box"></span>ja</span><span><span class="box"></span>nein</span></div>
-              </div>
-              <div class="row">
-                <div class="label">Bürge vorhanden?</div>
-                <div class="checks"><span><span class="box"></span>ja</span><span><span class="box"></span>nein</span></div>
-              </div>
-              <div class="row">
-                <div class="label">Vermögenswerte (z. B. Ersparnisse, Immobilien)?</div>
-                <div class="checks"><span><span class="box"></span>ja</span><span><span class="box"></span>nein</span></div>
-              </div>
+              <table class="form-table">
+                <tr><td class="label-cell"><div class="label">Laufende Kredite oder Ratenzahlungen?</div></td><td class="field-cell"><div class="checks"><span><span class="box"></span>ja</span><span><span class="box"></span>nein</span></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Bürge vorhanden?</div></td><td class="field-cell"><div class="checks"><span><span class="box"></span>ja</span><span><span class="box"></span>nein</span></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Vermögenswerte (z. B. Ersparnisse, Immobilien)?</div></td><td class="field-cell"><div class="checks"><span><span class="box"></span>ja</span><span><span class="box"></span>nein</span></div></td></tr>
+              </table>
             </div>
 
             <div class="note">
@@ -969,20 +909,16 @@
       </div>
     </section>
 
-    <!-- =========================================================
-         PAGE 6
-    ========================================================== -->
+    <!-- PAGE 6 -->
     <section class="page">
       <div class="page-inner">
-        <div class="motif"></div>
-
         <div class="page-body">
           <div class="page-head">
             <div>
               <div class="kicker">Modern • Abschnitt 05</div>
               <div class="h">
                 <h2>Nachweise (Checkliste) & Erklärungen</h2>
-                <div class="section-sub">Dokumente zur Stärkung der Bewerbung + Zustimmung/Unterschrift</div>
+                <div class="section-sub">Dokumente + Zustimmung/Unterschrift</div>
               </div>
             </div>
             <div class="page-no">Abschnitt 05</div>
@@ -995,12 +931,14 @@
             </div>
 
             <div class="form">
-              <div class="row"><div class="label">Einkommensnachweise (letzte 3 Monate)</div><div class="checks"><span><span class="box"></span>ja</span><span><span class="box"></span>nein</span></div></div>
-              <div class="row"><div class="label">Arbeitsvertrag / Beschäftigungsnachweis</div><div class="checks"><span><span class="box"></span>ja</span><span><span class="box"></span>nein</span></div></div>
-              <div class="row"><div class="label">SCHUFA-Bonitätsauskunft</div><div class="checks"><span><span class="box"></span>ja</span><span><span class="box"></span>nein</span></div></div>
-              <div class="row"><div class="label">Mietschuldenfreiheitsbescheinigung</div><div class="checks"><span><span class="box"></span>ja</span><span><span class="box"></span>nein</span></div></div>
-              <div class="row"><div class="label">Ausweiskopie</div><div class="checks"><span><span class="box"></span>ja</span><span><span class="box"></span>nein</span></div></div>
-              <div class="row"><div class="label">Bürgschaft (falls vorhanden)</div><div class="checks"><span><span class="box"></span>ja</span><span><span class="box"></span>nein</span></div></div>
+              <table class="form-table">
+                <tr><td class="label-cell"><div class="label">Einkommensnachweise (letzte 3 Monate)</div></td><td class="field-cell"><div class="checks"><span><span class="box"></span>ja</span><span><span class="box"></span>nein</span></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Arbeitsvertrag / Beschäftigungsnachweis</div></td><td class="field-cell"><div class="checks"><span><span class="box"></span>ja</span><span><span class="box"></span>nein</span></div></td></tr>
+                <tr><td class="label-cell"><div class="label">SCHUFA-Bonitätsauskunft</div></td><td class="field-cell"><div class="checks"><span><span class="box"></span>ja</span><span><span class="box"></span>nein</span></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Mietschuldenfreiheitsbescheinigung</div></td><td class="field-cell"><div class="checks"><span><span class="box"></span>ja</span><span><span class="box"></span>nein</span></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Ausweiskopie</div></td><td class="field-cell"><div class="checks"><span><span class="box"></span>ja</span><span><span class="box"></span>nein</span></div></td></tr>
+                <tr><td class="label-cell"><div class="label">Bürgschaft (falls vorhanden)</div></td><td class="field-cell"><div class="checks"><span><span class="box"></span>ja</span><span><span class="box"></span>nein</span></div></td></tr>
+              </table>
             </div>
           </div>
 
