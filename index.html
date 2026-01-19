@@ -3,962 +3,1032 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RentDoc Modern – Selbstauskunft (Official Document System)</title>
+  <title>RentDoc Modern – Mietbewerbung / Selbstauskunft</title>
 
   <style>
-    /* =========================
-       PRINT SETUP
-    ========================= */
-    @page { size: A4; margin: 16mm 16mm 16mm 16mm; }
+    /* =============================
+       A4 PRINT SETUP
+    ============================== */
+    @page {
+      size: A4;
+      margin: 18mm 18mm 18mm 18mm; /* top right bottom left */
+    }
 
     :root{
       --ink:#0b1220;
-      --muted:#5b667a;
-      --line:#d7dde8;
-      --line2:#e6ebf3;
-      --soft:#f6f8fb;
-      --accent:#0f6b5f;      /* ruhiges “Bank-/Schufa”-Grün */
-      --accent2:#1f9a7f;
-      --radius:10px;
-      --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
+      --muted:#475569;
+      --muted2:#64748b;
+      --line:#e2e8f0;
 
-      --pageTotal: 5;        /* FIX: total pages */
-      --footerH: 18mm;       /* reservierter Footer-Bereich */
+      /* Modern identity (clean teal/blue) */
+      --brand:#0ea5a4;        /* teal */
+      --brand2:#2563eb;       /* blue accent (secondary) */
+      --brandSoft:#e6fffb;
+
+      --paper:#ffffff;
+      --bg:#eef2f6;
+
+      --radius:14px;
+      --radius2:18px;
+
+      --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
     }
 
     html, body { height: 100%; }
     body{
-      margin: 0;
       font-family: var(--font);
       color: var(--ink);
-      background: #eef2f6;
+      margin: 0;
+      background: var(--bg);
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
       counter-reset: page;
     }
 
-    /* Screen preview */
+    /* Screen preview (centered A4 pages) */
     .preview-wrap{
-      padding: 26px 16px;
+      padding: 28px 16px;
       display: grid;
       place-items: start center;
       gap: 18px;
     }
 
-    /* A4 sheet on screen */
+    /* Each page is a fixed A4 canvas for stable layout */
     .page{
       width: 210mm;
-      min-height: 297mm;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 18px 40px rgba(15, 23, 42, .12);
+      height: 297mm;              /* FIXED HEIGHT => stable footer + no drifting */
+      background: var(--paper);
+      border-radius: 14px;
+      box-shadow: 0 18px 40px rgba(15,23,42,.12);
       overflow: hidden;
       position: relative;
       box-sizing: border-box;
-
-      /* per-page counter */
-      counter-increment: page;
     }
 
-    /* Print */
     @media print{
       body{ background: transparent; }
       .preview-wrap{ padding: 0; display: block; }
       .page{
-        width: auto;
-        min-height: auto;
-        border-radius: 0;
         box-shadow: none;
+        border-radius: 0;
+        width: auto;
+        height: auto;             /* print uses @page size */
         page-break-after: always;
       }
       .page:last-child{ page-break-after: auto; }
     }
 
-    /* Inner layout: reserve footer space */
+    /* Reserve space for footer so content never overlaps it */
     .page-inner{
-      position: relative;
       height: 100%;
-      box-sizing: border-box;
-      padding-bottom: var(--footerH);
+      position: relative;
     }
     .page-body{
-      padding: 16mm 16mm 10mm 16mm; /* bottom smaller: footer is reserved via page-inner padding-bottom */
       box-sizing: border-box;
+      height: 100%;
+      padding: 18mm 18mm 28mm 18mm;  /* bottom reserve for footer */
       position: relative;
       z-index: 2;
     }
 
-    /* =========================
-       MODERN WATERMARK BACKGROUND
-       (ruhige Linien/Wellen)
-    ========================= */
-    .watermark{
-      position: absolute;
-      inset: 0;
-      z-index: 1;
-      pointer-events: none;
-      opacity: 0.16;
-      background:
-        radial-gradient(900px 520px at 50% 18%, rgba(15,107,95,.18), rgba(15,107,95,0) 60%),
-        radial-gradient(800px 520px at 50% 105%, rgba(31,154,127,.14), rgba(31,154,127,0) 60%);
-    }
-    .watermark::after{
+    /* Subtle modern background lines (your “Markenzeichen”) */
+    .page::before{
       content:"";
-      position: absolute;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1600' viewBox='0 0 1200 1600'%3E%3Cg fill='none' stroke='%230f6b5f' stroke-opacity='0.28' stroke-width='2'%3E%3Cpath d='M-50 260 C 200 160, 420 360, 680 250 C 940 140, 1070 360, 1260 240'/%3E%3Cpath d='M-60 340 C 210 240, 420 420, 700 320 C 980 220, 1080 430, 1260 320'/%3E%3Cpath d='M-70 420 C 210 320, 440 500, 720 400 C 1000 300, 1100 520, 1270 410'/%3E%3Cpath d='M-80 500 C 220 400, 450 580, 740 490 C 1030 400, 1120 620, 1280 510'/%3E%3C/g%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-size: cover;
-      opacity: .55;
-      transform: translateY(-8mm);
+      position:absolute;
+      inset:0;
+      z-index:1;
+      opacity:.10;
+      pointer-events:none;
+      background:
+        radial-gradient(1200px 800px at 90% 10%, rgba(14,165,164,.28), transparent 55%),
+        radial-gradient(900px 600px at 20% 90%, rgba(37,99,235,.22), transparent 60%);
+    }
+    .page::after{
+      content:"";
+      position:absolute;
+      inset:-40mm;
+      z-index:1;
+      opacity:.08;
+      pointer-events:none;
+      background-repeat:no-repeat;
+      background-position: 50% 30%;
+      background-size: 120% 120%;
+      /* Minimal “wave/contour” linework via inline SVG */
+      background-image: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 800'>\
+  <g fill='none' stroke='%230ea5a4' stroke-width='2'>\
+    <path d='M-50 210 C 220 120, 420 310, 720 210 C 940 135, 1090 160, 1300 80'/>\
+    <path d='M-70 270 C 260 160, 460 350, 740 260 C 980 180, 1130 200, 1320 120'/>\
+    <path d='M-90 330 C 290 210, 520 390, 780 320 C 1030 255, 1160 255, 1340 170'/>\
+  </g>\
+  <g fill='none' stroke='%232563eb' stroke-width='2' opacity='0.9'>\
+    <path d='M-80 520 C 180 420, 420 650, 720 520 C 970 410, 1100 460, 1320 360'/>\
+    <path d='M-100 580 C 240 460, 470 700, 760 570 C 1010 455, 1140 520, 1340 410'/>\
+  </g>\
+</svg>");
     }
 
-    /* =========================
-       TYPE SYSTEM (bank-like)
-    ========================= */
-    .brand-row{
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: center;
-      gap: 10mm;
+    /* =============================
+       TYPOGRAPHY (modern but PDF-like)
+    ============================== */
+    h1{
+      font-size: 30px;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin: 0 0 10px 0;
+    }
+    h2{
+      font-size: 16px;
+      margin: 0 0 6px 0;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+    h3{
+      font-size: 11.8px;
+      margin: 0 0 6px 0;
+      color: var(--muted2);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .10em;
+    }
+    p{
+      margin: 0;
+      color: var(--muted);
+      font-size: 12.4px;
+      line-height: 1.6;
+    }
+    .small{
+      font-size: 11.4px;
+      color: var(--muted2);
+      line-height: 1.5;
     }
 
-    .brand-left{
-      display: grid;
-      gap: 2.2mm;
+    /* =============================
+       HEADER (document-style, minimal)
+    ============================== */
+    .doc-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      min-width: 200px;
+    }
+    .mark{
+      width: 34px; height: 34px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(14,165,164,.22), rgba(37,99,235,.18));
+      border: 1px solid rgba(226,232,240,.9);
+      position: relative;
+      overflow:hidden;
+    }
+    .mark::after{
+      content:"";
+      position:absolute;
+      inset: -18px;
+      background: radial-gradient(circle at 30% 35%, rgba(14,165,164,.55), transparent 55%),
+                  radial-gradient(circle at 70% 75%, rgba(37,99,235,.45), transparent 60%);
+      opacity:.9;
     }
     .brand-name{
-      font-weight: 800;
-      letter-spacing: .01em;
-      font-size: 14px;
-    }
-    .ods{
-      text-transform: uppercase;
-      letter-spacing: .38em;
-      font-size: 10px;
-      color: var(--muted);
-    }
-
-    .doc-class{
-      text-align: right;
-      font-size: 10.5px;
-      color: var(--muted);
-      line-height: 1.35;
-    }
-    .doc-class b{
-      color: var(--ink);
-      font-weight: 800;
-    }
-
-    .title-block{
-      margin-top: 18mm;
-      text-align: center;
-    }
-    .title-badge{
-      display: inline-grid;
-      place-items: center;
-      width: 22mm;
-      height: 22mm;
-      border-radius: 999px;
-      border: 2px solid rgba(15,107,95,.35);
-      background: rgba(15,107,95,.06);
-      margin-bottom: 6mm;
-    }
-    .title-badge .dot{
-      width: 8mm; height: 8mm;
-      border-radius: 999px;
-      border: 2px solid rgba(15,107,95,.55);
-      background: rgba(15,107,95,.10);
-      position: relative;
-    }
-    .title-badge .dot::after{
-      content:"";
-      position: absolute;
-      inset: 50% auto auto 50%;
-      width: 3mm; height: 3mm;
-      transform: translate(-50%,-50%);
-      border-radius: 999px;
-      background: rgba(15,107,95,.55);
-    }
-
-    h1{
-      margin: 0;
-      font-size: 30px;
-      letter-spacing: -0.02em;
-      line-height: 1.12;
-    }
-    .subtitle{
-      margin-top: 2mm;
-      font-size: 12px;
-      color: var(--muted);
-      letter-spacing: .04em;
-      text-transform: uppercase;
-    }
-
-    .legal-line{
-      margin-top: 4mm;
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    /* =========================
-       INFO CARDS (Cover)
-    ========================= */
-    .info-grid{
-      margin: 12mm auto 0 auto;
-      width: 150mm;
-      display: grid;
-      gap: 8mm;
-    }
-    .info-card{
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.85);
-      border-radius: var(--radius);
-      padding: 7mm 7mm;
-      box-sizing: border-box;
-    }
-    .info-card h3{
-      margin: 0 0 4mm 0;
-      font-size: 10.5px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .28em;
-    }
-    .kv{
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6mm 10mm;
-    }
-    .kv .k{
-      font-size: 10.5px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .18em;
-      margin-bottom: 1.2mm;
-    }
-    .kv .v{
-      font-size: 12.5px;
-      font-weight: 700;
-      color: var(--ink);
-    }
-    .kv .cell{ min-width: 0; }
-
-    /* =========================
-       SECTION HEADERS
-    ========================= */
-    .section{
-      margin-top: 6mm;
-    }
-    .section-head{
-      display: grid;
-      grid-template-columns: auto 1fr;
-      align-items: center;
-      gap: 4mm;
-      padding-bottom: 3mm;
-      border-bottom: 1px solid var(--line);
-      margin-bottom: 5mm;
-    }
-    .sec-no{
-      width: 12mm;
-      height: 9mm;
-      border: 1.5px solid rgba(11,18,32,.75);
-      display: grid;
-      place-items: center;
-      font-weight: 800;
-      font-size: 12px;
-      background: rgba(255,255,255,.7);
-    }
-    .sec-title{
-      display: grid;
-      gap: 1.2mm;
-    }
-    .sec-title b{
-      font-size: 13.5px;
-      letter-spacing: .02em;
-    }
-    .sec-title span{
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    /* =========================
-       FIELDS = BOXES (no lines)
-    ========================= */
-    .grid-2{
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 5mm 7mm;
-    }
-    .grid-3{
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 5mm 6mm;
-    }
-
-    .field{
-      display: grid;
-      gap: 1.6mm;
-    }
-    .field .label{
-      font-size: 10.5px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .18em;
-    }
-    .box{
-      height: 12mm;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: rgba(255,255,255,.85);
-    }
-    .box.tall{ height: 18mm; }
-    .box.xl{ height: 26mm; }
-
-    /* Checkbox list */
-    .checklist{
-      display: grid;
-      gap: 3mm;
-      margin-top: 2mm;
-    }
-    .check{
-      display: grid;
-      grid-template-columns: 5mm 1fr;
-      gap: 3mm;
-      align-items: start;
-      font-size: 12px;
-      color: var(--ink);
-    }
-    .check .sq{
-      width: 4.2mm;
-      height: 4.2mm;
-      border: 1.6px solid rgba(11,18,32,.65);
-      border-radius: 2px;
-      margin-top: 1mm;
-      background: rgba(255,255,255,.9);
-    }
-    .check span{
-      color: var(--muted);
-      font-size: 11.5px;
-      line-height: 1.45;
-    }
-
-    /* Emphasis income box */
-    .income-box{
-      border: 2px solid rgba(11,18,32,.85);
-      border-radius: 10px;
-      background: rgba(255,255,255,.85);
-      padding: 6mm;
-      display: grid;
-      gap: 3mm;
-    }
-    .income-box .cap{
-      font-size: 10.5px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .22em;
-    }
-    .income-box .amount{
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: end;
-      gap: 6mm;
-    }
-    .income-box .amount .big{
-      font-size: 24px;
       font-weight: 900;
       letter-spacing: -0.02em;
+      font-size: 14.5px;
+      color: var(--ink);
     }
-    .income-box .amount .eur{
-      font-size: 14px;
-      font-weight: 800;
-      color: var(--muted);
-      padding-bottom: 2mm;
-    }
-    .hint{
-      font-size: 11px;
-      color: var(--muted);
-      line-height: 1.45;
+    .brand-sub{
+      font-size: 11.2px;
+      color: var(--muted2);
+      margin-top: 2px;
     }
 
-    /* =========================
-       FOOTER (fixed bottom)
-    ========================= */
-    .footer{
-      position: absolute;
-      left: 16mm; right: 16mm;
-      bottom: 10mm;
-      z-index: 3;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: end;
-      gap: 8mm;
-      color: var(--muted);
-      font-size: 10.5px;
-      border-top: 1px solid var(--line);
-      padding-top: 3mm;
-      background: rgba(255,255,255,.72);
-      backdrop-filter: blur(1px);
-    }
-    .footer b{ color: var(--ink); font-weight: 800; }
-
-    .footer-right{
-      text-align: right;
+    .meta{
+      text-align:right;
+      font-size: 11.2px;
+      color: var(--muted2);
+      line-height: 1.55;
       white-space: nowrap;
     }
-    .page-no::after{
-      content: "Seite " counter(page) " / " var(--pageTotal);
+    .meta strong{ color: var(--ink); font-weight: 800; }
+
+    .accent{
+      height: 4px;
+      width: 64px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--brand), var(--brand2));
+      margin: 12px 0 14px 0;
     }
 
-    /* Keep blocks together when printing */
-    .avoid-break{ break-inside: avoid; page-break-inside: avoid; }
+    /* =============================
+       CARDS / BOXES (no writing lines)
+    ============================== */
+    .grid-2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      align-items:start;
+    }
+    .card{
+      border: 1px solid rgba(226,232,240,.95);
+      border-radius: var(--radius2);
+      background: rgba(255,255,255,.82);
+      padding: 12px 12px;
+      backdrop-filter: blur(4px);
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(14,165,164,.28);
+      background: rgba(230,255,251,.85);
+      color: var(--ink);
+      font-size: 12.2px;
+    }
+    .pill b{ font-weight: 900; }
+    .pill .dot{
+      width: 10px; height: 10px;
+      border-radius: 999px;
+      background: var(--brand);
+      box-shadow: 0 0 0 4px rgba(14,165,164,.16);
+    }
+
+    /* =============================
+       SECTION SYSTEM
+    ============================== */
+    .section{ margin-top: 12px; }
+    .section + .section{ margin-top: 14px; }
+
+    .section-head{
+      display:flex;
+      align-items:flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(226,232,240,.95);
+    }
+    .badge{
+      width: 28px; height: 28px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(14,165,164,.16), rgba(37,99,235,.12));
+      border: 1px solid rgba(226,232,240,.95);
+      display:grid;
+      place-items:center;
+      font-weight: 900;
+      color: var(--ink);
+      flex: 0 0 auto;
+    }
+    .section-sub{
+      margin-top: 2px;
+      font-size: 11.6px;
+      color: var(--muted2);
+    }
+
+    /* =============================
+       FIELDS (stable boxes)
+    ============================== */
+    .field-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .field-grid.single{ grid-template-columns: 1fr; }
+
+    .field{
+      border: 1.6px solid rgba(203,213,225,.95);
+      border-radius: 12px;
+      background: rgba(255,255,255,.90);
+      padding: 10px 10px;
+      min-height: 44px;     /* stable */
+      box-sizing: border-box;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+    }
+    .field .k{
+      font-size: 10.8px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted2);
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .field .v{
+      font-size: 12.8px;
+      color: #1f2937;
+      font-weight: 600;
+      line-height: 1.25;
+      min-height: 14px;
+    }
+    /* If you want it empty (not filled), keep v as blank placeholder */
+    .field .v.placeholder{
+      color: rgba(100,116,139,.55);
+      font-weight: 600;
+    }
+
+    .note{
+      margin-top: 10px;
+      border: 1px solid rgba(226,232,240,.95);
+      background: rgba(248,250,252,.92);
+      border-radius: var(--radius2);
+      padding: 12px;
+    }
+
+    ul{
+      margin: 8px 0 0 18px;
+      padding: 0;
+      color: var(--muted);
+      font-size: 12.2px;
+      line-height: 1.55;
+    }
+    li{ margin: 4px 0; }
+
+    /* Yes/No “choice” as boxes (still empty) */
+    .yn{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .yn-row{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 12px;
+      border: 1.6px solid rgba(203,213,225,.95);
+      border-radius: 12px;
+      background: rgba(255,255,255,.90);
+      padding: 10px 10px;
+      min-height: 44px;
+      box-sizing: border-box;
+    }
+    .yn-row .q{
+      font-size: 12.6px;
+      font-weight: 650;
+      color: #1f2937;
+    }
+    .checks{
+      display:flex;
+      gap: 12px;
+      align-items:center;
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .box{
+      width: 12px; height: 12px;
+      border: 1.8px solid rgba(100,116,139,.85);
+      border-radius: 3px;
+      display:inline-block;
+      margin-right: 6px;
+      vertical-align: middle;
+      background: transparent;
+    }
+
+    /* Signature */
+    .signature{
+      margin-top: 12px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .sig{
+      border: 1.6px solid rgba(203,213,225,.95);
+      border-radius: 12px;
+      min-height: 54px;
+      background: rgba(255,255,255,.90);
+      padding: 10px 10px;
+      box-sizing: border-box;
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-end;
+    }
+    .sig .lbl{
+      font-size: 10.8px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted2);
+      font-weight: 800;
+    }
+
+    /* =============================
+       FOOTER (always at bottom)
+    ============================== */
+    footer.footer{
+      position:absolute;
+      left:0; right:0;
+      bottom:0;
+      z-index:2;
+      padding: 10mm 18mm 8mm 18mm;
+      box-sizing:border-box;
+      color: var(--muted2);
+      font-size: 11px;
+    }
+    .footer-row{
+      border-top: 1px solid rgba(226,232,240,.95);
+      padding-top: 8px;
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      align-items:center;
+    }
+    .footer-row .center{ text-align:center; }
+    .footer-row .right{ text-align:right; }
+
+    .page-number::after{
+      counter-increment: page;
+      content: "Seite " counter(page) " von 6";
+    }
+
+    /* Avoid breaking cards/blocks */
+    .avoid-break{
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
   </style>
 </head>
 
 <body>
   <div class="preview-wrap">
 
-    <!-- =======================
-         PAGE 01 / 05  (COVER)
-    ======================== -->
+    <!-- =========================================================
+         PAGE 1/6 – COVER + QUICK OVERVIEW (PDF, not landingpage)
+    ========================================================== -->
     <section class="page">
       <div class="page-inner">
-        <div class="watermark"></div>
-
         <div class="page-body">
-          <div class="brand-row">
-            <div class="brand-left">
-              <div class="brand-name">RentDoc</div>
-              <div class="ods">Official Document System</div>
+
+          <div class="doc-head">
+            <div class="brand">
+              <div class="mark" aria-hidden="true"></div>
+              <div>
+                <div class="brand-name">RentDoc</div>
+                <div class="brand-sub">Mietbewerbung / Selbstauskunft</div>
+              </div>
             </div>
-            <div class="doc-class">
-              <div>Dokumentenklasse</div>
-              <div><b>Selbstauskunft</b></div>
+
+            <div class="meta">
+              <div>Dokument-ID: <strong>RD-2026-XXXXXX</strong></div>
+              <div>Erstellt am: <strong>{{Datum}}</strong></div>
+              <div>Version: <strong>Modern</strong></div>
             </div>
           </div>
 
-          <div class="title-block">
-            <div class="title-badge" aria-hidden="true"><div class="dot"></div></div>
-            <h1>Mietbewerbung</h1>
-            <div class="subtitle">Selbstauskunft gemäß BGB §§ 535 ff.</div>
-            <div class="legal-line">Vertrauliche Selbstauskunft zur Prüfung Ihrer Mietbewerbung.</div>
+          <h1>Mietbewerbung / Selbstauskunft</h1>
+          <div class="accent"></div>
+
+          <p class="small" style="max-width: 140mm;">
+            Digitale Selbstauskunft zur Wohnungsbewerbung. Alle Angaben werden vertraulich behandelt und
+            ausschließlich zum Zweck der Prüfung Ihrer Bewerbung verwendet.
+          </p>
+
+          <div style="margin-top: 14px;">
+            <span class="pill"><span class="dot"></span><b>Modern</b> – strukturierte Selbstauskunft mit professioneller Darstellung</span>
           </div>
 
-          <div class="info-grid">
-            <div class="info-card avoid-break">
-              <h3>Dokumenten-Information</h3>
-              <div class="kv">
-                <div class="cell">
-                  <div class="k">Dokument-ID *</div>
-                  <div class="v">RD-{{ID}}</div>
-                </div>
-                <div class="cell">
-                  <div class="k">Ausstellungsdatum *</div>
-                  <div class="v">{{Datum}}</div>
-                </div>
-                <div class="cell">
-                  <div class="k">Bewerber/in *</div>
-                  <div class="v">{{Vollname}}</div>
-                </div>
-                <div class="cell">
-                  <div class="k">Mietobjekt *</div>
-                  <div class="v">{{MietobjektAdresse}}</div>
-                </div>
+          <div style="margin-top: 16px;" class="grid-2">
+            <div class="card avoid-break">
+              <h3>Zweck des Dokuments</h3>
+              <p>
+                Diese Selbstauskunft dient der strukturierten Darstellung der persönlichen und finanziellen Situation
+                im Rahmen einer Wohnungsbewerbung. Alle Angaben erfolgen freiwillig.
+              </p>
+            </div>
+            <div class="card avoid-break">
+              <h3>Rechtlicher Hinweis</h3>
+              <p>
+                Die Verarbeitung Ihrer Daten erfolgt ausschließlich zum Zweck der Wohnungsbewerbung gemäß Art. 6 Abs. 1 lit. b DSGVO.
+                Falschangaben können rechtliche Konsequenzen haben.
+              </p>
+            </div>
+          </div>
+
+          <div style="margin-top: 14px;" class="card avoid-break">
+            <h3>Quick-Übersicht (optional)</h3>
+            <p class="small">
+              Dieses Feld ist bewusst als Übersicht gedacht. In der finalen, ausgefüllten PDF-Version können hier automatisch
+              die wichtigsten Angaben zusammengefasst werden (z. B. Haushaltsgröße, Einzugsdatum, Netto, Beschäftigung).
+              In der leeren Vorlage bleibt es frei.
+            </p>
+
+            <div style="margin-top: 10px;" class="field-grid">
+              <div class="field">
+                <div class="k">Haushaltsgröße</div>
+                <div class="v placeholder">—</div>
+              </div>
+              <div class="field">
+                <div class="k">Gewünschter Einzug</div>
+                <div class="v placeholder">—</div>
+              </div>
+              <div class="field">
+                <div class="k">Beschäftigung</div>
+                <div class="v placeholder">—</div>
+              </div>
+              <div class="field">
+                <div class="k">Haushaltsnetto</div>
+                <div class="v placeholder">—</div>
               </div>
             </div>
           </div>
+
         </div>
 
         <footer class="footer">
-          <div><b>RENTDOC</b> <span>VERTRAULICH</span> • Doc-ID: <b>RD-{{ID}}</b></div>
-          <div class="footer-right">Ausgabe: 2026-01 • DSGVO-konform • <span class="page-no"></span></div>
+          <div class="footer-row">
+            <div>RentDoc • Modern • Digitale Selbstauskunft</div>
+            <div class="center">Format: DIN A4 • Sprache: Deutsch</div>
+            <div class="right page-number"></div>
+          </div>
         </footer>
       </div>
     </section>
 
-    <!-- =======================
-         PAGE 02 / 05
-         01 Persönliche Angaben
-    ======================== -->
+    <!-- =========================================================
+         PAGE 2/6 – 1 Mietobjekt + 2 Hauptmieter
+    ========================================================== -->
     <section class="page">
       <div class="page-inner">
-        <div class="watermark"></div>
-
         <div class="page-body">
-          <div class="brand-row">
-            <div class="brand-left">
-              <div class="brand-name">RentDoc</div>
-              <div class="ods">Official Document System</div>
+
+          <div class="doc-head">
+            <div class="brand">
+              <div class="mark" aria-hidden="true"></div>
+              <div>
+                <div class="brand-name">RentDoc</div>
+                <div class="brand-sub">Modern – Selbstauskunft</div>
+              </div>
             </div>
-            <div class="doc-class">
-              <div>Dokumentenklasse</div>
-              <div><b>Selbstauskunft</b></div>
+            <div class="meta">
+              <div>Dokument-ID: <strong>RD-2026-XXXXXX</strong></div>
+              <div>Version: <strong>Modern</strong></div>
             </div>
           </div>
 
+          <!-- 1 -->
           <div class="section">
             <div class="section-head">
-              <div class="sec-no">01</div>
-              <div class="sec-title">
-                <b>Persönliche Angaben</b>
-                <span>Hauptmieter / Hauptmieterin</span>
+              <div class="badge">1</div>
+              <div>
+                <h2>Mietobjekt</h2>
+                <div class="section-sub">Angaben zum gewünschten Mietobjekt</div>
               </div>
             </div>
 
-            <div class="avoid-break" style="margin-bottom:6mm;">
-              <div class="sec-title" style="gap:1mm;">
-                <b style="font-size:12px;">Personalien</b>
-                <span>Grundangaben zur Person</span>
-              </div>
-              <div style="height:3mm;"></div>
-
-              <div class="grid-3">
-                <div class="field">
-                  <div class="label">Anrede *</div>
-                  <div class="box"></div>
-                </div>
-                <div class="field">
-                  <div class="label">Titel</div>
-                  <div class="box"></div>
-                </div>
-                <div class="field">
-                  <div class="label">Namenszusatz</div>
-                  <div class="box"></div>
-                </div>
-              </div>
-
-              <div style="height:5mm;"></div>
-
-              <div class="grid-2">
-                <div class="field">
-                  <div class="label">Vorname(n) *</div>
-                  <div class="box"></div>
-                </div>
-                <div class="field">
-                  <div class="label">Nachname(n) *</div>
-                  <div class="box"></div>
-                </div>
-                <div class="field">
-                  <div class="label">Geburtsdatum *</div>
-                  <div class="box"></div>
-                </div>
-                <div class="field">
-                  <div class="label">Geburtsort *</div>
-                  <div class="box"></div>
-                </div>
-                <div class="field">
-                  <div class="label">Staatsangehörigkeit *</div>
-                  <div class="box"></div>
-                </div>
-                <div class="field">
-                  <div class="label">Familienstand *</div>
-                  <div class="box"></div>
-                </div>
+            <div class="field-grid single">
+              <div class="field">
+                <div class="k">Adresse des Mietobjekts</div>
+                <div class="v placeholder">—</div>
               </div>
             </div>
 
-            <div class="avoid-break" style="margin-top:7mm;">
-              <div class="sec-title" style="gap:1mm;">
-                <b style="font-size:12px;">Ausweisdokument</b>
-                <span>Angaben wie im Ausweis</span>
+            <div style="margin-top:10px;" class="field-grid">
+              <div class="field">
+                <div class="k">Gewünschter Einzugstermin</div>
+                <div class="v placeholder">—</div>
               </div>
-              <div style="height:3mm;"></div>
-
-              <div class="grid-2">
-                <div class="field">
-                  <div class="label">Ausweistyp *</div>
-                  <div class="box"></div>
-                </div>
-                <div class="field">
-                  <div class="label">Ausweisnummer *</div>
-                  <div class="box"></div>
-                </div>
+              <div class="field">
+                <div class="k">Gewünschte Mietdauer</div>
+                <div class="v placeholder">—</div>
               </div>
-            </div>
-
-            <div class="avoid-break" style="margin-top:7mm;">
-              <div class="sec-title" style="gap:1mm;">
-                <b style="font-size:12px;">Haushaltszusammensetzung</b>
-                <span>Weitere Personen im Haushalt</span>
+              <div class="field">
+                <div class="k">Anzahl einziehende Personen</div>
+                <div class="v placeholder">—</div>
               </div>
-              <div style="height:3mm;"></div>
-
-              <div class="grid-2">
-                <div class="field">
-                  <div class="label">Anzahl Personen *</div>
-                  <div class="box"></div>
-                </div>
-                <div class="field">
-                  <div class="label">Kinder im Haushalt</div>
-                  <div class="box"></div>
-                </div>
-                <div class="field" style="grid-column: 1 / -1;">
-                  <div class="label">Bemerkung / weitere Personen (optional)</div>
-                  <div class="box xl"></div>
-                </div>
+              <div class="field">
+                <div class="k">Haustiere (optional)</div>
+                <div class="v placeholder">—</div>
               </div>
             </div>
-
           </div>
+
+          <!-- 2 -->
+          <div class="section">
+            <div class="section-head">
+              <div class="badge">2</div>
+              <div>
+                <h2>Hauptmieter – Persönliche Angaben</h2>
+                <div class="section-sub">Angaben zur Person des Hauptmieters</div>
+              </div>
+            </div>
+
+            <div class="field-grid single">
+              <div class="field">
+                <div class="k">Vollständiger Name</div>
+                <div class="v placeholder">—</div>
+              </div>
+            </div>
+
+            <div style="margin-top:10px;" class="field-grid">
+              <div class="field">
+                <div class="k">Geburtsdatum</div>
+                <div class="v placeholder">—</div>
+              </div>
+              <div class="field">
+                <div class="k">Staatsangehörigkeit</div>
+                <div class="v placeholder">—</div>
+              </div>
+              <div class="field">
+                <div class="k">Familienstand (optional)</div>
+                <div class="v placeholder">—</div>
+              </div>
+              <div class="field">
+                <div class="k">Ausweis-Nr. (optional)</div>
+                <div class="v placeholder">—</div>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         <footer class="footer">
-          <div><b>RENTDOC</b> <span>VERTRAULICH</span> • Doc-ID: <b>RD-{{ID}}</b></div>
-          <div class="footer-right">Ausgabe: 2026-01 • DSGVO-konform • <span class="page-no"></span></div>
+          <div class="footer-row">
+            <div>RentDoc • Modern • Digitale Selbstauskunft</div>
+            <div class="center">Vertraulich</div>
+            <div class="right page-number"></div>
+          </div>
         </footer>
       </div>
     </section>
 
-    <!-- =======================
-         PAGE 03 / 05
-         02 Kontaktdaten & Wohnsituation
-    ======================== -->
+    <!-- =========================================================
+         PAGE 3/6 – 3 Kontaktdaten + 4 Wohnsituation & Beruf
+    ========================================================== -->
     <section class="page">
       <div class="page-inner">
-        <div class="watermark"></div>
-
         <div class="page-body">
-          <div class="brand-row">
-            <div class="brand-left">
-              <div class="brand-name">RentDoc</div>
-              <div class="ods">Official Document System</div>
+
+          <div class="doc-head">
+            <div class="brand">
+              <div class="mark" aria-hidden="true"></div>
+              <div>
+                <div class="brand-name">RentDoc</div>
+                <div class="brand-sub">Modern – Selbstauskunft</div>
+              </div>
             </div>
-            <div class="doc-class">
-              <div>Dokumentenklasse</div>
-              <div><b>Selbstauskunft</b></div>
+            <div class="meta">
+              <div>Dokument-ID: <strong>RD-2026-XXXXXX</strong></div>
+              <div>Version: <strong>Modern</strong></div>
             </div>
           </div>
 
+          <!-- 3 -->
           <div class="section">
             <div class="section-head">
-              <div class="sec-no">02</div>
-              <div class="sec-title">
-                <b>Kontaktdaten & Wohnsituation</b>
-                <span>Erreichbarkeit und aktuelle Wohnverhältnisse</span>
+              <div class="badge">3</div>
+              <div>
+                <h2>Kontaktdaten</h2>
+                <div class="section-sub">Aktuelle Erreichbarkeit</div>
               </div>
             </div>
 
-            <div class="avoid-break">
-              <div class="sec-title" style="gap:1mm;">
-                <b style="font-size:12px;">Kontaktinformationen</b>
-                <span>Für Rückfragen im Bewerbungsprozess</span>
-              </div>
-              <div style="height:3mm;"></div>
-
-              <div class="grid-2">
-                <div class="field">
-                  <div class="label">Mobiltelefon *</div>
-                  <div class="box"></div>
-                </div>
-                <div class="field">
-                  <div class="label">Festnetz (optional)</div>
-                  <div class="box"></div>
-                </div>
-                <div class="field" style="grid-column: 1 / -1;">
-                  <div class="label">E-Mail-Adresse *</div>
-                  <div class="box"></div>
-                </div>
+            <div class="field-grid single">
+              <div class="field">
+                <div class="k">Aktuelle Anschrift</div>
+                <div class="v placeholder">—</div>
               </div>
             </div>
 
-            <div class="avoid-break" style="margin-top:8mm;">
-              <div class="sec-title" style="gap:1mm;">
-                <b style="font-size:12px;">Aktuelle Anschrift</b>
-                <span>Angaben zum aktuellen Wohnsitz</span>
+            <div style="margin-top:10px;" class="field-grid">
+              <div class="field">
+                <div class="k">Telefonnummer</div>
+                <div class="v placeholder">—</div>
               </div>
-              <div style="height:3mm;"></div>
-
-              <div class="grid-2">
-                <div class="field" style="grid-column: 1 / -1;">
-                  <div class="label">Straße, Hausnummer *</div>
-                  <div class="box"></div>
-                </div>
-
-                <div class="field">
-                  <div class="label">Postleitzahl *</div>
-                  <div class="box"></div>
-                </div>
-                <div class="field">
-                  <div class="label">Ort *</div>
-                  <div class="box"></div>
-                </div>
-
-                <div class="field">
-                  <div class="label">Land *</div>
-                  <div class="box"></div>
-                </div>
-                <div class="field">
-                  <div class="label">Wohnhaft seit * (Monat/Jahr)</div>
-                  <div class="box"></div>
-                </div>
-
-                <div class="field">
-                  <div class="label">Wohnfläche (m²)</div>
-                  <div class="box"></div>
-                </div>
-                <div class="field">
-                  <div class="label">Kündigungsfrist (Monate)</div>
-                  <div class="box"></div>
-                </div>
-
-                <div class="field">
-                  <div class="label">Kaltmiete (EUR)</div>
-                  <div class="box"></div>
-                </div>
-                <div class="field">
-                  <div class="label">Nebenkosten (EUR)</div>
-                  <div class="box"></div>
-                </div>
+              <div class="field">
+                <div class="k">E-Mail-Adresse</div>
+                <div class="v placeholder">—</div>
               </div>
             </div>
-
           </div>
+
+          <!-- 4 -->
+          <div class="section">
+            <div class="section-head">
+              <div class="badge">4</div>
+              <div>
+                <h2>Wohnsituation & Beruf</h2>
+                <div class="section-sub">Aktuelle Lebens- und Berufssituation</div>
+              </div>
+            </div>
+
+            <div class="field-grid">
+              <div class="field">
+                <div class="k">Aktuelle Wohnsituation</div>
+                <div class="v placeholder">—</div>
+              </div>
+              <div class="field">
+                <div class="k">Seit wann an der Anschrift?</div>
+                <div class="v placeholder">—</div>
+              </div>
+              <div class="field">
+                <div class="k">Arbeitgeber / Berufsstatus</div>
+                <div class="v placeholder">—</div>
+              </div>
+              <div class="field">
+                <div class="k">Art der Beschäftigung</div>
+                <div class="v placeholder">—</div>
+              </div>
+              <div class="field">
+                <div class="k">Beschäftigt seit</div>
+                <div class="v placeholder">—</div>
+              </div>
+              <div class="field">
+                <div class="k">Probezeit (ja/nein)</div>
+                <div class="v placeholder">—</div>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         <footer class="footer">
-          <div><b>RENTDOC</b> <span>VERTRAULICH</span> • Doc-ID: <b>RD-{{ID}}</b></div>
-          <div class="footer-right">Ausgabe: 2026-01 • DSGVO-konform • <span class="page-no"></span></div>
+          <div class="footer-row">
+            <div>RentDoc • Modern • Digitale Selbstauskunft</div>
+            <div class="center">Nur zur Wohnungsbewerbung</div>
+            <div class="right page-number"></div>
+          </div>
         </footer>
       </div>
     </section>
 
-    <!-- =======================
-         PAGE 04 / 05
-         03 Berufliche Situation & Einkommen
-    ======================== -->
+    <!-- =========================================================
+         PAGE 4/6 – 5 Einkommen + 6 Bonität & Zahlungshistorie
+    ========================================================== -->
     <section class="page">
       <div class="page-inner">
-        <div class="watermark"></div>
-
         <div class="page-body">
-          <div class="brand-row">
-            <div class="brand-left">
-              <div class="brand-name">RentDoc</div>
-              <div class="ods">Official Document System</div>
+
+          <div class="doc-head">
+            <div class="brand">
+              <div class="mark" aria-hidden="true"></div>
+              <div>
+                <div class="brand-name">RentDoc</div>
+                <div class="brand-sub">Modern – Selbstauskunft</div>
+              </div>
             </div>
-            <div class="doc-class">
-              <div>Dokumentenklasse</div>
-              <div><b>Selbstauskunft</b></div>
+            <div class="meta">
+              <div>Dokument-ID: <strong>RD-2026-XXXXXX</strong></div>
+              <div>Version: <strong>Modern</strong></div>
             </div>
           </div>
 
+          <!-- 5 -->
           <div class="section">
             <div class="section-head">
-              <div class="sec-no">03</div>
-              <div class="sec-title">
-                <b>Berufliche Situation & Einkommen</b>
-                <span>Wirtschaftliche Verhältnisse</span>
+              <div class="badge">5</div>
+              <div>
+                <h2>Einkommen</h2>
+                <div class="section-sub">Finanzielle Verhältnisse</div>
               </div>
             </div>
 
-            <div class="avoid-break">
-              <div class="sec-title" style="gap:1mm;">
-                <b style="font-size:12px;">Beschäftigungsverhältnis</b>
-                <span>Angaben zur aktuellen Tätigkeit</span>
+            <div class="field-grid">
+              <div class="field">
+                <div class="k">Monatliches Haushaltsnettoeinkommen</div>
+                <div class="v placeholder">—</div>
               </div>
-              <div style="height:3mm;"></div>
-
-              <div class="grid-2">
-                <div class="field">
-                  <div class="label">Berufsbezeichnung *</div>
-                  <div class="box"></div>
-                </div>
-                <div class="field">
-                  <div class="label">Arbeitgeber / Firma *</div>
-                  <div class="box"></div>
-                </div>
-
-                <div class="field">
-                  <div class="label">Branche</div>
-                  <div class="box"></div>
-                </div>
-                <div class="field">
-                  <div class="label">Position / Funktion</div>
-                  <div class="box"></div>
-                </div>
-
-                <div class="field">
-                  <div class="label">Beschäftigt seit * (Monat/Jahr)</div>
-                  <div class="box"></div>
-                </div>
-                <div class="field">
-                  <div class="label">Beschäftigungsart *</div>
-                  <div class="box"></div>
-                </div>
+              <div class="field">
+                <div class="k">Weitere Einkünfte (optional)</div>
+                <div class="v placeholder">—</div>
+              </div>
+              <div class="field">
+                <div class="k">Unbefristet / Befristet</div>
+                <div class="v placeholder">—</div>
+              </div>
+              <div class="field">
+                <div class="k">Selbstständig (ja/nein)</div>
+                <div class="v placeholder">—</div>
               </div>
             </div>
 
-            <div class="avoid-break" style="margin-top:10mm;">
-              <div class="income-box">
-                <div class="cap">Haushaltsnettoeinkommen (gesamt)</div>
-                <div class="amount">
-                  <div class="big">{{NettoEinkommen}}</div>
-                  <div class="eur">,00 €</div>
-                </div>
-                <div class="hint">Monatlich nach Abzug aller Steuern und Sozialabgaben</div>
+            <div class="note">
+              <p>
+                Ich bestätige, dass die gemachten Angaben zu meinem Einkommen der Wahrheit entsprechen.
+                Mir ist bewusst, dass falsche Angaben zu einer Ablehnung meiner Bewerbung oder zur fristlosen Kündigung
+                eines Mietverhältnisses führen können.
+              </p>
+            </div>
+          </div>
+
+          <!-- 6 -->
+          <div class="section">
+            <div class="section-head">
+              <div class="badge">6</div>
+              <div>
+                <h2>Bonität & Zahlungshistorie</h2>
+                <div class="section-sub">Angaben zur finanziellen Zuverlässigkeit</div>
               </div>
             </div>
 
-            <div class="avoid-break" style="margin-top:10mm;">
-              <div class="sec-title" style="gap:1mm;">
-                <b style="font-size:12px;">Einkommensnachweis</b>
-                <span>Kann im Modern-/Premium-Prozess ergänzt werden</span>
-              </div>
-              <div style="height:3mm;"></div>
-              <div class="grid-2">
-                <div class="field">
-                  <div class="label">Nachweis vorhanden</div>
-                  <div class="box"></div>
+            <div class="yn">
+              <div class="yn-row">
+                <div class="q">Bestehen aktuell Mietrückstände?</div>
+                <div class="checks">
+                  <span><span class="box"></span>Ja</span>
+                  <span><span class="box"></span>Nein</span>
                 </div>
-                <div class="field">
-                  <div class="label">Hinweis / Quelle</div>
-                  <div class="box"></div>
+              </div>
+
+              <div class="yn-row">
+                <div class="q">Liegen negative SCHUFA-Einträge vor?</div>
+                <div class="checks">
+                  <span><span class="box"></span>Ja</span>
+                  <span><span class="box"></span>Nein</span>
+                </div>
+              </div>
+
+              <div class="yn-row">
+                <div class="q">Wurde in den letzten 3 Jahren eine eidesstattliche Versicherung abgegeben?</div>
+                <div class="checks">
+                  <span><span class="box"></span>Ja</span>
+                  <span><span class="box"></span>Nein</span>
+                </div>
+              </div>
+
+              <div class="yn-row">
+                <div class="q">Wurde in den letzten 3 Jahren Privatinsolvenz angemeldet?</div>
+                <div class="checks">
+                  <span><span class="box"></span>Ja</span>
+                  <span><span class="box"></span>Nein</span>
                 </div>
               </div>
             </div>
 
           </div>
+
         </div>
 
         <footer class="footer">
-          <div><b>RENTDOC</b> <span>VERTRAULICH</span> • Doc-ID: <b>RD-{{ID}}</b></div>
-          <div class="footer-right">Ausgabe: 2026-01 • DSGVO-konform • <span class="page-no"></span></div>
+          <div class="footer-row">
+            <div>RentDoc • Modern • Digitale Selbstauskunft</div>
+            <div class="center">Vertraulich</div>
+            <div class="right page-number"></div>
+          </div>
         </footer>
       </div>
     </section>
 
-    <!-- =======================
-         PAGE 05 / 05
-         04 Bonität & Erklärungen
-    ======================== -->
+    <!-- =========================================================
+         PAGE 5/6 – 7 Nachweise (Modern: klare Checkliste)
+    ========================================================== -->
     <section class="page">
       <div class="page-inner">
-        <div class="watermark"></div>
-
         <div class="page-body">
-          <div class="brand-row">
-            <div class="brand-left">
-              <div class="brand-name">RentDoc</div>
-              <div class="ods">Official Document System</div>
+
+          <div class="doc-head">
+            <div class="brand">
+              <div class="mark" aria-hidden="true"></div>
+              <div>
+                <div class="brand-name">RentDoc</div>
+                <div class="brand-sub">Modern – Selbstauskunft</div>
+              </div>
             </div>
-            <div class="doc-class">
-              <div>Dokumentenklasse</div>
-              <div><b>Selbstauskunft</b></div>
+            <div class="meta">
+              <div>Dokument-ID: <strong>RD-2026-XXXXXX</strong></div>
+              <div>Version: <strong>Modern</strong></div>
             </div>
           </div>
 
+          <!-- 7 -->
           <div class="section">
             <div class="section-head">
-              <div class="sec-no">04</div>
-              <div class="sec-title">
-                <b>Bonität & Erklärungen</b>
-                <span>Selbstauskunft und rechtliche Bestätigung</span>
+              <div class="badge">7</div>
+              <div>
+                <h2>Nachweise – Übersicht</h2>
+                <div class="section-sub">Empfohlene Unterlagen zur Bewerbung (nicht zwingend)</div>
               </div>
             </div>
 
-            <div class="avoid-break">
-              <div class="sec-title" style="gap:1mm;">
-                <b style="font-size:12px;">Bonitätsauskunft</b>
-                <span>Bitte zutreffend ankreuzen</span>
-              </div>
+            <div class="card">
+              <h3>Hinweis</h3>
+              <p>
+                Im Rahmen des Modern-Pakets sind keine Nachweise automatisch verpflichtend. In der Praxis kann der Vermieter
+                oder die Hausverwaltung zusätzliche Unterlagen anfordern. Diese Übersicht unterstützt eine vollständige Bewerbung.
+              </p>
+            </div>
 
-              <div class="checklist">
-                <div class="check">
-                  <div class="sq"></div>
-                  <div>
-                    Ich bin in der Lage, die vereinbarte Miete sowie Nebenkosten pünktlich und vollständig zu zahlen
-                  </div>
-                </div>
-                <div class="check">
-                  <div class="sq"></div>
-                  <div>
-                    <span>In den letzten 24 Monaten gab es keine Mietrückstände oder Zahlungsausfälle</span>
-                  </div>
-                </div>
-                <div class="check">
-                  <div class="sq"></div>
-                  <div>
-                    <span>Es laufen keine Insolvenz-, Mahn- oder Vollstreckungsverfahren gegen mich</span>
-                  </div>
-                </div>
-                <div class="check">
-                  <div class="sq"></div>
-                  <div>
-                    <span>Es bestehen keine negativen Einträge bei Auskunfteien (z. B. SCHUFA, Creditreform)</span>
-                  </div>
-                </div>
-                <div class="check">
-                  <div class="sq"></div>
-                  <div>
-                    <span>Ich bin bereit, eine aktuelle SCHUFA-Bonitätsauskunft vorzulegen</span>
-                  </div>
-                </div>
+            <div style="margin-top:12px;" class="grid-2">
+              <div class="card avoid-break">
+                <h3>Typische Einkommensnachweise</h3>
+                <ul>
+                  <li>Gehaltsabrechnungen der letzten 3 Monate</li>
+                  <li>Arbeitsvertrag / Arbeitgeberbestätigung</li>
+                  <li>Bei Selbstständigen: BWA / Steuerbescheid</li>
+                </ul>
+              </div>
+              <div class="card avoid-break">
+                <h3>Bonität & Identität</h3>
+                <ul>
+                  <li>SCHUFA-Bonitätsauskunft</li>
+                  <li>Kopie Personalausweis (optional)</li>
+                  <li>Mietschuldenfreiheitsbescheinigung</li>
+                </ul>
               </div>
             </div>
 
-            <div class="avoid-break" style="margin-top:8mm;">
-              <div class="sec-title" style="gap:1mm;">
-                <b style="font-size:12px;">Weitere Angaben</b>
-                <span>Optional – falls zutreffend</span>
-              </div>
-              <div style="height:3mm;"></div>
-
-              <div class="grid-2">
-                <div class="field">
-                  <div class="label">Laufende Kredite / Ratenzahlungen</div>
-                  <div class="box tall"></div>
-                </div>
-                <div class="field">
-                  <div class="label">Monatliche Belastung (EUR)</div>
-                  <div class="box"></div>
-                </div>
-
-                <div class="field">
-                  <div class="label">Bürge vorhanden</div>
-                  <div class="box"></div>
-                </div>
-                <div class="field">
-                  <div class="label">Name & Kontakt (falls zutreffend)</div>
-                  <div class="box"></div>
-                </div>
-              </div>
+            <div class="note avoid-break">
+              <p class="small">
+                Diese Seite ist als strukturierte Orientierung gedacht. In der ausgefüllten Version kann RentDoc zusätzlich
+                eine Dokumenten-Übersicht erzeugen (z. B. „liegt bei / wird nachgereicht“). In der leeren Vorlage bleibt sie neutral.
+              </p>
             </div>
-
-            <div class="avoid-break" style="margin-top:9mm;">
-              <div class="sec-title" style="gap:1mm;">
-                <b style="font-size:12px;">Datenschutz & Einwilligung</b>
-                <span>Einwilligungserklärung (DSGVO)</span>
-              </div>
-              <div style="height:3mm;"></div>
-
-              <div class="info-card" style="width:100%; padding:6mm; border-radius:12px;">
-                <div class="sec-title" style="gap:2mm; margin-bottom:3mm;">
-                  <b style="font-size:12px; letter-spacing:.04em;">Einwilligungserklärung (DSGVO)</b>
-                  <span style="font-size:11px;">
-                    Ich willige ein, dass meine personenbezogenen Daten ausschließlich zum Zweck der Prüfung meiner Mietbewerbung verarbeitet werden.
-                    Die Daten werden vertraulich behandelt und nach Abschluss des Bewerbungsverfahrens bzw. spätestens nach 6 Monaten gelöscht,
-                    sofern kein Mietvertrag zustande kommt. Rechte gemäß Art. 15–20 DSGVO (Auskunft, Berichtigung, Löschung, Datenübertragbarkeit).
-                  </span>
-                </div>
-
-                <div class="grid-2" style="margin-top:5mm;">
-                  <div class="field">
-                    <div class="label">Ort, Datum</div>
-                    <div class="box"></div>
-                  </div>
-                  <div class="field">
-                    <div class="label">Unterschrift</div>
-                    <div class="box"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
           </div>
+
         </div>
 
         <footer class="footer">
-          <div><b>RENTDOC</b> <span>VERTRAULICH</span> • Doc-ID: <b>RD-{{ID}}</b></div>
-          <div class="footer-right">Ausgabe: 2026-01 • DSGVO-konform • <span class="page-no"></span></div>
+          <div class="footer-row">
+            <div>RentDoc • Modern • Digitale Selbstauskunft</div>
+            <div class="center">Hinweis: Unterlagen können nachgereicht werden</div>
+            <div class="right page-number"></div>
+          </div>
+        </footer>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         PAGE 6/6 – 8 Erklärung & DSGVO + Signatur
+    ========================================================== -->
+    <section class="page">
+      <div class="page-inner">
+        <div class="page-body">
+
+          <div class="doc-head">
+            <div class="brand">
+              <div class="mark" aria-hidden="true"></div>
+              <div>
+                <div class="brand-name">RentDoc</div>
+                <div class="brand-sub">Modern – Selbstauskunft</div>
+              </div>
+            </div>
+            <div class="meta">
+              <div>Dokument-ID: <strong>RD-2026-XXXXXX</strong></div>
+              <div>Version: <strong>Modern</strong></div>
+            </div>
+          </div>
+
+          <!-- 8 -->
+          <div class="section">
+            <div class="section-head">
+              <div class="badge">8</div>
+              <div>
+                <h2>Erklärung & DSGVO-Einwilligung</h2>
+                <div class="section-sub">Bestätigung der Richtigkeit und Einwilligung zur Datenverarbeitung</div>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="card avoid-break">
+                <h3>Erklärung zur Richtigkeit</h3>
+                <p>
+                  Ich versichere hiermit, dass alle von mir gemachten Angaben in dieser Selbstauskunft vollständig und
+                  wahrheitsgemäß sind. Mir ist bewusst, dass vorsätzlich falsche oder unvollständige Angaben zur Ablehnung
+                  meiner Bewerbung führen können und im Falle eines bereits geschlossenen Mietvertrages einen wichtigen Grund
+                  zur außerordentlichen Kündigung gemäß § 543 Abs. 1 BGB darstellen können.
+                </p>
+              </div>
+
+              <div class="card avoid-break">
+                <h3>Einwilligung (DSGVO)</h3>
+                <p>
+                  Ich willige ein, dass meine in dieser Selbstauskunft gemachten personenbezogenen Daten zum Zweck der Bearbeitung
+                  meiner Wohnungsbewerbung verarbeitet werden. Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. b DSGVO
+                  (Vertragsanbahnung). Mir ist bekannt, dass meine Daten an den Vermieter bzw. die beauftragte Hausverwaltung
+                  weitergeleitet werden. Die Daten werden ausschließlich für die Prüfung meiner Bewerbung verwendet und nach Abschluss
+                  des Bewerbungsverfahrens bzw. nach Ablehnung unverzüglich gelöscht, sofern keine gesetzlichen Aufbewahrungspflichten bestehen.
+                </p>
+              </div>
+            </div>
+
+            <div class="signature avoid-break">
+              <div class="sig">
+                <div class="lbl">Ort, Datum</div>
+              </div>
+              <div class="sig">
+                <div class="lbl">Unterschrift Hauptmieter</div>
+              </div>
+            </div>
+
+            <div class="note" style="margin-top:12px;">
+              <p class="small">
+                Hinweis: Dieses Dokument dient ausschließlich zur Wohnungsbewerbung und ersetzt keine notarielle Beglaubigung.
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+        <footer class="footer">
+          <div class="footer-row">
+            <div>RentDoc • Modern • Digitale Selbstauskunft</div>
+            <div class="center">Nur zur Wohnungsbewerbung</div>
+            <div class="right page-number"></div>
+          </div>
         </footer>
       </div>
     </section>
